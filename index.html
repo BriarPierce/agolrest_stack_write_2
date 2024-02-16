@@ -108,6 +108,7 @@
       const airportLayer = new FeatureLayer({
   url: "https://services.arcgis.com/HRPe58bUyBqyyiCt/arcgis/rest/services/US_Airports/FeatureServer",
   renderer: airportRenderer,
+  definitionExpression: "Fac_Type = 'AIRPORT'", //adding sql to filter for airports
   outFields: ["Fac_Name", "Fac_Type"],
   popupTemplate: popupAirport
 });
