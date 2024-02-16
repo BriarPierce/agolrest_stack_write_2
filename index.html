@@ -140,17 +140,17 @@ const airportLabels = {
   ]
 };
 
-const airportAndHeliportLayer = new FeatureLayer({
+const airportorHeliportLayer = new FeatureLayer({
   url: "https://services.arcgis.com/HRPe58bUyBqyyiCt/arcgis/rest/services/US_Airports/FeatureServer",
   renderer: uniqueValueRenderer, // Use the renderer you defined earlier
-  definitionExpression: "Fac_Type = 'AIRPORT' OR Fac_Type = 'HELIPORT'", // SQL to filter for airports and heliports
+  definitionExpression: "Fac_Type = 'AIRPORT' or Fac_Type = 'HELIPORT'", // SQL to filter for airports or heliports
   outFields: ["Fac_Name", "Fac_Type"],
   popupTemplate: popupAirport,
   labelingInfo: [airportLabels]
 });
 
-// Add airport and heliport layer to the map
-map.add(airportAndHeliportLayer);
+// Add airport or heliport layer to the map
+map.add(airportorHeliportLayer);
 
       //adding the Const for the feature layer
       const usaeduLayer = new FeatureLayer({
