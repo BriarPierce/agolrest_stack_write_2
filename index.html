@@ -114,28 +114,43 @@ const airportLabels = {
         "content": "<b>Name:</b> {Fac_Name}<br><b>Type:</b> {Fac_Type}<br>"
       }
 
- // Define a renderer for airportLayer
- const airportRenderer = {
-        "type": "simple",
-        "symbol": {
-          "type": "picture-marker",
-          "url": "https://BriarPierce.github.io/js_stack_read/outline_local_airport_black_24dp.png",
-          "width": "18px",
-          "height": "18px"
-        }
+      // Define a renderer for airportLayer
+      const uniqueValueRenderer = {
+  type: "unique-value",  // autocasts as new UniqueValueRenderer()
+  field: "Fac_Type",
+  uniqueValueInfos: [
+    {
+      value: "AIRPORT",
+      symbol: {
+        type: "picture-marker",
+        url: "https://BriarPierce.github.io/js_stack_read/outline_local_airport_black_24dp.png",
+        width: "18px",
+        height: "18px"
       }
+    },
+    {
+      value: "HELIPORT",
+      symbol: {
+        type: "picture-marker",
+        url: "https://BriarPierce.github.io/js_stack_read/heliport_image.png",
+        width: "18px",
+        height: "18px"
+      }
+    }
+  ]
+};
 
-      const airportLayer = new FeatureLayer({
-        url: "https://services.arcgis.com/HRPe58bUyBqyyiCt/arcgis/rest/services/US_Airports/FeatureServer",
-        renderer: airportRenderer, //calling the icon
-        definitionExpression: "Fac_Type = 'AIRPORT'", //adding sql to filter for airports
-        outFields: ["Fac_Name", "Fac_Type"],
-        popupTemplate: popupAirport,
-        labelingInfo: [airportLabels] //adding the labels
-      });
+const airportAndHeliportLayer = new FeatureLayer({
+  url: "https://services.arcgis.com/HRPe58bUyBqyyiCt/arcgis/rest/services/US_Airports/FeatureServer",
+  renderer: uniqueValueRenderer, // Use the renderer you defined earlier
+  definitionExpression: "Fac_Type = 'AIRPORT' OR Fac_Type = 'HELIPORT'", // SQL to filter for airports and heliports
+  outFields: ["Fac_Name", "Fac_Type"],
+  popupTemplate: popupAirport,
+  labelingInfo: [airportLabels]
+});
 
-      // Add airport layer to the map
-      map.add(airportLayer);
+// Add airport and heliport layer to the map
+map.add(airportAndHeliportLayer);
 
       //adding the Const for the feature layer
       const usaeduLayer = new FeatureLayer({
