@@ -18,8 +18,9 @@
         "esri/views/MapView",
         "esri/Graphic",
         "esri/layers/GraphicsLayer",
-        "esri/layers/FeatureLayer"
-      ], function(esriConfig, Map, MapView, Graphic, GraphicsLayer, FeatureLayer) {
+        "esri/layers/FeatureLayer",
+        "esri/widgets/Editor",
+      ], function(esriConfig, Map, MapView, Graphic, GraphicsLayer, FeatureLayer, Editor) {
         esriConfig.apiKey = "AAPK0aee94b5d3fa4c61aef2f6d673b63373r6ZylQKkEbWdEmmxojG-k71cUosjAIB5Xe3c8UbDfw0HC6OxRxrargG4xciHm75i";
   
         const map = new Map({ basemap: "gray-vector" });
@@ -130,6 +131,33 @@ const airportLabels = {
       //adding the feature layer to the map
       map.add(usaeduLayer);
     });
+
+//adding the const for the feature layer
+const myAirports = new FeatureLayer({
+  url: "https://services5.arcgis.com/ZYK688A64hFRZ5yX/arcgis/rest/services/My_Airports/FeatureServer",
+  //adding the popup here
+  outFields: ["AirportCode"],
+});
+
+view.when(function() {
+  //adding the feature layer to the map
+  map.add(myAirports);
+});
+
+// Set the layer property of the pointInfos object to the FeatureLayer instance
+const pointInfos = {
+  layer: myAirports
+}
+
+// Create a new Editor instance, setting the view and layerInfos properties
+const editor = new Editor({
+  view: view,
+  layerInfos: [pointInfos]
+});
+
+// Add the Editor instance to the view UI
+view.ui.add(editor, "top-right");
+
     </script>
   </head>
   <body>
