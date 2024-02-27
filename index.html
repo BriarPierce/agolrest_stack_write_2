@@ -2,7 +2,6 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
-    <title>ArcGIS Maps SDK for JavaScript Tutorials: Display a map</title>
 
     <style>
       html, body, #viewDiv { padding: 0; margin: 0; height: 100%; width: 100%; }
@@ -20,144 +19,72 @@
         "esri/layers/GraphicsLayer",
         "esri/layers/FeatureLayer",
         "esri/widgets/Editor",
-      ], function(esriConfig, Map, MapView, Graphic, GraphicsLayer, FeatureLayer, Editor) {
+        "esri/widgets/Legend"
+      ], function(esriConfig, Map, MapView, Graphic, GraphicsLayer, FeatureLayer, Editor, Legend) {
         esriConfig.apiKey = "AAPK0aee94b5d3fa4c61aef2f6d673b63373r6ZylQKkEbWdEmmxojG-k71cUosjAIB5Xe3c8UbDfw0HC6OxRxrargG4xciHm75i";
   
         const map = new Map({ basemap: "gray-vector" });
         const view = new MapView({ container: "viewDiv", map: map, zoom: 1, center: [0, 0] });
         const graphicsLayer = new GraphicsLayer();  
         map.add(graphicsLayer);
-  
-        const createGraphic = (geometry, symbol, attributes, popupTemplate) => {
-          const graphic = new Graphic({ geometry, symbol, attributes, popupTemplate });
-          graphicsLayer.add(graphic);
+
+        const myAirportsRederer = {
+          "type": "simple",
+          "symbol": {
+            "type": "picture-marker",
+            "url": "https://briarpierce.github.io/agolrest_stack_write_2/airport_icon.png",
+            "width": "18px",
+            "height": "18px"
+          }
         };
 
-      // Point me to the lawer
-      createGraphic(
-        { type: "point", longitude: -97.750689, latitude: 30.263098 },
-        { type: "simple-marker", color: [0, 0, 139], outline: { color: [255, 0, 0], width: 1 }, style: "x", size: 50 },
-        { Name: "Stevie Ray Vaughan Statue", Description: "A bronze sculpture of Stevie Ray Vaughan by Ralph Helmick" },
-        { title: "{Name}", content: "{Description}" }
-      );
+        const MyairportLabels = {
+          symbol: {
+            type: "text",
+            color: "#FFFFFF",
+            haloColor: "#5E8D74",
+            haloSize: "2px",
+            font: {
+              size: "16px",
+              family: "Noto Sans",
+              style: "italic",
+              weight: "normal"
+            }
+          },
+          labelPlacement: "above-center",
+          labelExpressionInfo: {
+            expression: "$feature.Airport_Code"
+          }
+        };
+  
+        const myAirports = new FeatureLayer({
+          url: "https://services5.arcgis.com/ZYK688A64hFRZ5yX/arcgis/rest/services/My_Airports/FeatureServer",
+          renderer: myAirportsRederer,
+          labelingInfo: [MyairportLabels],
+          outFields: ["AirportCode"],
+        });
 
-      // Polygon
-      createGraphic(
-        { type: "polygon", rings: [[-97.750689 - 0.01, 30.263098 - 0.01], [-97.750689 + 0.01, 30.263098 - 0.01], [-97.750689 + 0.01, 30.263098 + 0.01], [-97.750689 - 0.01, 30.263098 + 0.01], [-97.750689 - 0.01, 30.263098 - 0.01]] },
-        { type: "simple-fill", color: [255, 255, 255, 0.8], outline: { color: [255, 255, 255], width: 1 } }
-      );
+        view.when(function() {
+          map.add(myAirports);
+        });
 
-      // Polyline
-      createGraphic(
-        { type: "polyline", paths: [[-97.750689, 30.263098], [-97.750689, 30.263098 + 0.009]] },
-        { type: "simple-line", color: [226, 119, 40], width: 2 }
-      );
-              
-      // Define a pop-up for usaeduLayer
-      const popupEduusa = {
-        "title": "EDUs",
-        "content": "<b>Name:</b> {INSTNM}<br><b>Total Enrollment:</b> {INSTSIZE}<br><b>City:</b> {CITY}<br><b>ZIP:</b> {ZIP}<br>"
-      }
+        const editor = new Editor({
+          view: view,
+          layerInfos: [{ layer: myAirports }]
+        });
 
-//const to make the airport labels
-const airportLabels = {
-  symbol: {
-    type: "text",
-    color: "#FFFFFF",
-    haloColor: "#5E8D74",
-    haloSize: "2px",
-    font: {
-      size: "12px",
-      family: "Noto Sans",
-      style: "italic",
-      weight: "normal"
-    }
-  },
-  labelPlacement: "above-center",
-  labelExpressionInfo: {
-    expression: "$feature.Fac_Name"
-  }
-};
+        view.ui.add(editor, "top-right");
 
-      // Define a pop-up for airportLayer
-      const popupAirport = {
-        "title": "Airport",
-        "content": "<b>Name:</b> {Fac_Name}<br><b>Type:</b> {Fac_Type}<br>"
-      }
+        let legend = new Legend({
+          view: view,
+          layerInfos: [{
+            layer: myAirports,
+            title: 'Airports I  have Visited'
+          }]
+        });
 
-      // Define a renderer for airportLayer
-      const uniqueValueRenderer = {
-  type: "unique-value",  // autocasts as new UniqueValueRenderer()
-  field: "Fac_Type",
-  uniqueValueInfos: [
-    {
-      value: "AIRPORT",
-      symbol: {
-        type: "picture-marker",
-        url: "https://BriarPierce.github.io/js_stack_read/outline_local_airport_black_24dp.png",
-        width: "18px",
-        height: "18px"
-      }
-    },
-    {
-      value: "HELIPORT",
-      symbol: {
-        type: "picture-marker",
-        url: "https://BriarPierce.github.io/js_stack_read/heliport_image.png",
-        width: "18px",
-        height: "18px"
-      }
-    }
-  ]
-};
-
-   // Add airport or heliport layer to the map
-   map.add(new FeatureLayer({
-      url: "https://services.arcgis.com/HRPe58bUyBqyyiCt/arcgis/rest/services/US_Airports/FeatureServer",
-      renderer: uniqueValueRenderer, // Use the renderer you defined earlier
-      definitionExpression: "Fac_Type = 'AIRPORT' or Fac_Type = 'HELIPORT'", // SQL to filter for airports or heliports
-      outFields: ["Fac_Name", "Fac_Type"],
-      popupTemplate: popupAirport,
-      labelingInfo: [airportLabels]
-    }));
-
-    // Add the feature layer to the map
-    map.add(new FeatureLayer({
-      url: "https://services2.arcgis.com/FiaPA4ga0iQKduv3/arcgis/rest/services/Colleges_and_Universities_View/FeatureServer",
-      outFields: ["INSTNM","INSTSIZE"],
-      popupTemplate: popupEduusa
-    }));
-
-      //adding the feature layer to the map
-      map.add(usaeduLayer);
-    });
-
-//adding the const for the feature layer
-const myAirports = new FeatureLayer({
-  url: "https://services5.arcgis.com/ZYK688A64hFRZ5yX/arcgis/rest/services/My_Airports/FeatureServer",
-  //adding the popup here
-  outFields: ["AirportCode"],
-});
-
-view.when(function() {
-  //adding the feature layer to the map
-  map.add(myAirports);
-});
-
-// Set the layer property of the pointInfos object to the FeatureLayer instance
-const pointInfos = {
-  layer: myAirports
-}
-
-// Create a new Editor instance, setting the view and layerInfos properties
-const editor = new Editor({
-  view: view,
-  layerInfos: [pointInfos]
-});
-
-// Add the Editor instance to the view UI
-view.ui.add(editor, "top-right");
-
+        view.ui.add(legend, "bottom-right");
+      });
     </script>
   </head>
   <body>
